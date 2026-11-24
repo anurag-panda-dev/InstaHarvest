@@ -6,7 +6,7 @@ import { MSG } from '../messages.js';
 import { PRESETS, VERSION } from '../storage/schema.js';
 import { formatDuration, formatNumber } from '../pacing.js';
 import * as db from '../storage/db.js';
-import { exportJson, exportCsv } from '../storage/export.js';
+import { exportJson, exportCsv, exportPostImagesZip } from '../storage/export.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -49,6 +49,7 @@ const el = {
   exportCounts: $('exportCounts'),
   exportJsonBtn: $('exportJsonBtn'),
   exportCsvBtn: $('exportCsvBtn'),
+  exportZipBtn: $('exportZipBtn'),
   exportNote: $('exportNote'),
   logToggle: $('logToggle'),
   logBody: $('logBody'),
@@ -106,7 +107,25 @@ let lastExportUsername = '';
 let lastLogCount = -1;
 let busyAction = false;
 
-init().catch((err) => showSetupError(err.message));
+const splashFallback = setTimeout(() => dismissSplash(), 8000);
+
+init()
+  .then(async () => {
+    await new Promise((resolve) => window.setTimeout(resolve, 900));
+    dismissSplash();
+  })
+  .catch((err) => {
+    dismissSplash();
+    showSetupError(err.message);
+  });
+
+function dismissSplash() {
+  clearTimeout(splashFallback);
+  const splash = document.getElementById('splashScreen');
+  if (!splash || splash.classList.contains('is-leaving')) return;
+  splash.classList.add('is-leaving');
+  window.setTimeout(() => splash.remove(), 450);
+}
 
 async function init() {
   el.versionText.textContent = VERSION;
@@ -440,6 +459,7 @@ function renderExport() {
   const hasUser = Boolean(username);
   el.exportJsonBtn.disabled = !hasUser;
   el.exportCsvBtn.disabled = !hasUser;
+  el.exportZipBtn.disabled = !hasUser;
 
   if (username && username !== lastExportUsername) {
     lastExportUsername = username;
@@ -705,6 +725,7 @@ function bindEvents() {
 
   el.exportJsonBtn.addEventListener('click', () => doExport('json'));
   el.exportCsvBtn.addEventListener('click', () => doExport('csv'));
+  el.exportZipBtn.addEventListener('click', () => doExport('zip'));
 
   el.logToggle.addEventListener('click', () => {
     const open = el.logBody.hidden;
@@ -769,11 +790,20 @@ async function doExport(kind) {
     if (kind === 'json') {
       const result = await exportJson(lastExportUsername);
       el.exportNote.textContent = `Saved ${result.name}.`;
-    } else {
+    } else if (kind === 'csv') {
       const result = await exportCsv(lastExportUsername);
       el.exportNote.textContent = result.names.length
         ? `Saved ${result.names.length} CSV file${result.names.length === 1 ? '' : 's'}.`
         : 'Nothing to export yet.';
+    } else {
+      const result = await exportPostImagesZip(lastExportUsername, (done, total) => {
+        el.exportNote.textContent = `Downloading post media… ${done}/${total}`;
+      });
+      if (result.mediaCount) {
+        el.exportNote.textContent = `Saved ${result.name} (${result.mediaCount} image${result.mediaCount === 1 ? '' : 's'})`;
+      } else {
+        el.exportNote.textContent = `No images downloaded (${result.candidateCount} candidate${result.candidateCount === 1 ? '' : 's'}; ${result.failedCount} failed). Reload/re-harvest with Posts + Carousel enabled.`;
+      }
     }
   } catch (err) {
     el.exportNote.textContent = err.message;

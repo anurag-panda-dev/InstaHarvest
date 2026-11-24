@@ -1255,13 +1255,18 @@ async function postStep(step) {
   const post = data.post || {};
   const key = [job.profileUsername, step.shortcode];
   const existing = (await db.get('posts', key)) || {};
+  const thumbnail = post.thumbnail || existing.thumbnail || '';
+  const carousel = Array.isArray(post.carousel) && post.carousel.length
+    ? post.carousel
+    : (Array.isArray(existing.carousel) ? existing.carousel : []);
   await db.put('posts', {
     ...existing,
     ...post,
+    thumbnail,
+    carousel,
     profileUsername: job.profileUsername,
     shortcode: step.shortcode,
-    detailScrapedAt: nowIso(),
-    carousel: post.carousel || existing.carousel || []
+    detailScrapedAt: nowIso()
   });
 
   if (data.comments) {

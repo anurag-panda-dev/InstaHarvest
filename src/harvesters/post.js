@@ -118,7 +118,9 @@ export async function closePost(pacing) {
 }
 
 function pickActiveMedia(scope) {
-  const nodes = S.selectAll('carouselMedia', scope);
+  let nodes = S.selectAll('carouselMedia', scope);
+  if (!nodes.length) nodes = S.selectAll('postMediaImg', scope);
+  if (!nodes.length) nodes = S.selectAll('postMediaVideo', scope);
   let best = null;
   let bestScore = 0;
   const viewport = { left: 0, top: 0, right: window.innerWidth, bottom: window.innerHeight };
@@ -129,9 +131,16 @@ function pickActiveMedia(scope) {
     const rect = visibleRect(node);
     if (!rect) continue;
     if (rect.width < 150 || rect.height < 150) continue;
+    if (node.tagName === 'IMG') {
+      const alt = (node.getAttribute('alt') || '').toLowerCase();
+      if (/profile picture/i.test(alt) || /profile.*photo/i.test(alt)) continue;
+    }
 
     const overlap = intersectArea(rect, viewport);
-    if (!overlap) continue;
+    if (!overlap) {
+      const image = node.tagName === 'IMG';
+      if (image && rect.width * rect.height < 30000) continue;
+    }
 
     const nearCenter = 1 - Math.min(
       1,

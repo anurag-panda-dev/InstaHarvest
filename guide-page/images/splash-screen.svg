@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="620" viewBox="0 0 1100 620">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#6857d9"/><stop offset="1" stop-color="#4e3eb4"/></linearGradient></defs>
+<rect width="1100" height="620" fill="url(#g)"/><circle cx="1030" cy="-20" r="180" fill="#ffb768" opacity=".18"/><circle cx="70" cy="620" r="180" fill="#62d6b7" opacity=".16"/>
+<rect x="390" y="100" width="320" height="420" rx="28" fill="#fff" opacity=".08" stroke="#fff" stroke-opacity=".18"/>
+<rect x="495" y="148" width="110" height="110" rx="28" fill="#fff" opacity=".16" stroke="#fff" stroke-opacity=".28"/><rect x="520" y="173" width="60" height="60" rx="12" fill="#fff"/><text x="525" y="215" font-family="Segoe UI" font-size="34" fill="#6857d9">▦</text>
+<text x="550" y="310" text-anchor="middle" font-family="Segoe UI" font-size="34" font-weight="900" fill="#fff">InstaHarvest</text><text x="550" y="340" text-anchor="middle" font-family="Segoe UI" font-size="11" font-weight="800" fill="#fff" opacity=".75">PROFILE DATA STUDIO</text>
+<rect x="465" y="378" width="170" height="6" rx="3" fill="#fff" opacity=".18"/><rect x="465" y="378" width="80" height="6" rx="3" fill="#ffd66d"/><text x="550" y="420" text-anchor="middle" font-family="Segoe UI" font-size="13" fill="#fff" opacity=".82">Preparing your workspace…</text>
+</svg>

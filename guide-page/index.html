@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#6857d9" />
+    <meta name="description" content="Install and use InstaHarvest, the local-first Chrome extension for organizing Instagram profile data, posts, followers, comments, likers, and exports." />
+    <meta name="keywords" content="InstaHarvest, Instagram data extension, Instagram profile exporter, Chrome extension, Instagram posts, followers, following, likers, comments, local data" />
+    <meta name="author" content="Anurag Panda" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://anurag-panda-dev.github.io/InstaHarvest/guide-page/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:site_name" content="InstaHarvest" />
+    <meta property="og:title" content="InstaHarvest — Local-first Instagram profile data" />
+    <meta property="og:description" content="Install the Chrome extension, collect Instagram profiles and posts locally, and export JSON, CSV, or named image ZIP files with this beginner-friendly guide." />
+    <meta property="og:url" content="https://anurag-panda-dev.github.io/InstaHarvest/guide-page/" />
+    <meta property="og:image" content="https://anurag-panda-dev.github.io/InstaHarvest/guide-page/images/og-image.png" />
+    <meta property="og:image:secure_url" content="https://anurag-panda-dev.github.io/InstaHarvest/guide-page/images/og-image.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="InstaHarvest — profile data, exports, and Chrome installation guide" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="InstaHarvest — Local-first Instagram profile data" />
+    <meta name="twitter:description" content="A polished Chrome extension for local Instagram profile, post, follower, comment, liker, and media exports." />
+    <meta name="twitter:image" content="https://anurag-panda-dev.github.io/InstaHarvest/guide-page/images/og-image.png" />
+    <meta name="twitter:image:alt" content="InstaHarvest profile data studio" />
+
+    <title>InstaHarvest — Installation and user guide</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "InstaHarvest",
+        "applicationCategory": "BrowserApplication",
+        "operatingSystem": "Chrome",
+        "description": "A local-first Chrome extension for Instagram profile, post, follower, following, comment, liker, and image export workflows.",
+        "softwareVersion": "1.0.0",
+        "author": {
+          "@type": "Person",
+          "name": "Anurag Panda"
+        },
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "license": "https://github.com/anurag-panda-dev/InstaHarvest/blob/main/LICENSE",
+        "codeRepository": "https://github.com/anurag-panda-dev/InstaHarvest"
+      }
+    </script>
+    <link rel="icon" href="../icons/Icon-128.png" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="nav-shell">
+      <nav class="nav container" aria-label="Main navigation">
+        <a class="brand" href="#top" aria-label="InstaHarvest home">
+          <img src="../icons/Icon-128.png" alt="" />
+          <span>InstaHarvest</span>
+        </a>
+        <div class="nav-links">
+          <a href="#features">Features</a>
+          <a href="#install">Install</a>
+          <a href="#guide">Guide</a>
+          <a href="#detailed-guide">User guide</a>
+          <a href="https://github.com/anurag-panda-dev/InstaHarvest" target="_blank" rel="noopener">GitHub</a>
+        </div>
+        <a class="nav-download" href="https://github.com/anurag-panda-dev/InstaHarvest/releases/latest/download/InstaHarvest.zip" download>Download ZIP <span>↓</span></a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="hero-glow hero-glow-one"></div>
+        <div class="hero-glow hero-glow-two"></div>
+        <div class="container hero-grid">
+          <div class="hero-copy">
+            <div class="eyebrow"><span></span> Your browser. Your data.</div>
+            <h1>Instagram data,<br /><em>gathered locally.</em></h1>
+            <p class="hero-lead">
+              Discover profiles, posts, followers, following, comments, and likers in one polished Chrome side panel—without a cloud service or API account.
+            </p>
+            <div class="hero-actions">
+              <a class="button button-primary" href="https://github.com/anurag-panda-dev/InstaHarvest/releases/latest/download/InstaHarvest.zip" download>Download extension ZIP <span>↓</span></a>
+              <a class="button button-ghost" href="#install">Installation guide</a>
+            </div>
+            <div class="trust-row" aria-label="Key benefits">
+              <span><b>●</b> Local storage</span>
+              <span><b>●</b> No telemetry</span>
+              <span><b>●</b> Human-like pacing</span>
+            </div>
+          </div>
+
+          <div class="hero-visual" aria-label="InstaHarvest extension preview">
+            <div class="visual-orbit orbit-one"></div>
+            <div class="visual-orbit orbit-two"></div>
+            <div class="preview-window">
+              <div class="preview-topbar">
+                <div class="preview-brand">
+                  <img src="../icons/Icon-48.png" alt="" />
+                  <div><strong>InstaHarvest</strong><small>Profile Data Studio</small></div>
+                </div>
+                <span class="preview-status">Harvesting</span>
+              </div>
+              <div class="preview-body">
+                <div class="preview-profile">
+                  <div class="preview-avatar">@</div>
+                  <div><strong>@your.profile</strong><small>Custom harvest · 36 posts</small></div>
+                </div>
+                <div class="preview-progress"><span></span></div>
+                <div class="preview-cards">
+                  <div class="preview-card preview-card-violet"><small>Profile</small><strong>Saved</strong></div>
+                  <div class="preview-card preview-card-mint"><small>Posts</small><strong>36</strong></div>
+                  <div class="preview-card preview-card-peach"><small>Followers</small><strong>408</strong></div>
+                </div>
+                <div class="preview-step">
+                  <span class="preview-step-dot"></span>
+                  <div><strong>Collecting followers</strong><small>Scrolling the list safely…</small></div>
+                  <b>72%</b>
+                </div>
+              </div>
+            </div>
+            <div class="float-chip chip-one"><span>JSON</span><small>Full data</small></div>
+            <div class="float-chip chip-two"><span>ZIP</span><small>Post images</small></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="feature-strip" id="features">
+        <div class="container">
+          <div class="section-heading">
+            <div>
+              <div class="eyebrow eyebrow-dark"><span></span> A complete local toolkit</div>
+              <h2>Everything in one calm workspace.</h2>
+            </div>
+            <p>Choose a quick run or build a custom harvest, then export exactly what you need.</p>
+          </div>
+
+          <div class="feature-grid">
+            <article class="feature-card feature-purple">
+              <div class="feature-icon">◎</div>
+              <h3>Profile studio</h3>
+              <p>Collect usernames, names, bios, avatars, counts, verification, categories, and external links.</p>
+            </article>
+            <article class="feature-card feature-mint">
+              <div class="feature-icon">▦</div>
+              <h3>Post explorer</h3>
+              <p>Discover posts, reels, captions, timestamps, likes, comments, thumbnails, and carousel slides.</p>
+            </article>
+            <article class="feature-card feature-peach">
+              <div class="feature-icon">♢</div>
+              <h3>List collector</h3>
+              <p>Capture followers, following, likers, and comment threads with user-confirmed list dialogs.</p>
+            </article>
+            <article class="feature-card feature-yellow">
+              <div class="feature-icon">↓</div>
+              <h3>Flexible exports</h3>
+              <p>Download full JSON, flattened CSV files, or a ZIP of named post images.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="install-section" id="install">
+        <div class="container install-grid">
+          <div class="install-copy">
+            <div class="eyebrow eyebrow-dark"><span></span> Chrome installation</div>
+            <h2>Install in under a minute.</h2>
+            <p>Download the latest packaged release, extract it, and load it as an unpacked Chrome extension.</p>
+            <ol class="install-steps">
+              <li>
+                <span>1</span>
+                <div><strong>Download the release ZIP</strong><small>Get <a class="inline-link" href="https://github.com/anurag-panda-dev/InstaHarvest/releases/latest/download/InstaHarvest.zip" download>InstaHarvest.zip</a> from GitHub Releases.</small></div>
+              </li>
+              <li>
+                <span>2</span>
+                <div><strong>Extract the archive</strong><small>Right-click the ZIP, choose <b>Extract All</b>, and remember the extracted folder.</small></div>
+              </li>
+              <li>
+                <span>3</span>
+                <div><strong>Open Chrome Extensions</strong><small>Visit <code>chrome://extensions</code> in a new Chrome tab.</small></div>
+              </li>
+              <li>
+                <span>4</span>
+                <div><strong>Enable Developer mode</strong><small>Turn on the switch in the upper-right corner.</small></div>
+              </li>
+              <li>
+                <span>5</span>
+                <div><strong>Load the extracted folder</strong><small>Choose <b>Load unpacked</b>, then select the folder containing <code>manifest.json</code>.</small></div>
+              </li>
+              <li>
+                <span>6</span>
+                <div><strong>Open Instagram</strong><small>Sign in, open the side panel, enter a profile, and start.</small></div>
+              </li>
+            </ol>
+          </div>
+
+          <div class="install-visual">
+            <div class="chrome-card">
+              <div class="chrome-card-top">
+                <span class="chrome-dot"></span><span class="chrome-dot"></span><span class="chrome-dot"></span>
+                <div class="chrome-address">chrome://extensions</div>
+              </div>
+              <div class="chrome-card-body">
+                <div class="chrome-row">
+                  <div><b>Developer mode</b><small>Allows locally loaded extensions</small></div>
+                  <div class="toggle-on"><span></span></div>
+                </div>
+                <div class="chrome-actions">
+                  <div class="chrome-action chrome-action-primary">Load unpacked</div>
+                  <div class="chrome-action">Pack extension</div>
+                  <div class="chrome-action">Update</div>
+                </div>
+                <div class="folder-drop">
+                  <span>📁</span>
+                  <div><strong>Select the extracted folder</strong><small>Choose the folder containing manifest.json</small></div>
+                </div>
+              </div>
+            </div>
+            <div class="pin-note"><span>⌁</span><b>Pin the icon</b> for quick access</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="guide-section" id="guide">
+        <div class="container">
+          <div class="guide-heading">
+            <div>
+              <div class="eyebrow eyebrow-dark"><span></span> Three simple steps</div>
+              <h2>From profile to export.</h2>
+            </div>
+          </div>
+          <div class="guide-grid">
+            <article>
+              <div class="guide-number">01</div>
+              <img src="../InstaHarvest.png" alt="InstaHarvest side panel overview" />
+              <h3>Choose your scope</h3>
+              <p>Paste a username or profile URL, then select Quick, Deep, or Custom.</p>
+            </article>
+            <article>
+              <div class="guide-number">02</div>
+              <div class="guide-demo">
+                <div class="demo-modal">
+                  <span class="demo-icon">◉</span>
+                  <strong>Open the list</strong>
+                  <small>Leave the Instagram view open</small>
+                  <b>Confirm</b>
+                </div>
+              </div>
+              <h3>Confirm when asked</h3>
+              <p>Open follower, following, or liker dialogs only when the panel requests them.</p>
+            </article>
+            <article>
+              <div class="guide-number">03</div>
+              <div class="guide-demo export-demo">
+                <div class="export-file">.JSON</div>
+                <div class="export-file">.CSV</div>
+                <div class="export-file export-file-zip">.ZIP</div>
+              </div>
+              <h3>Export locally</h3>
+              <p>Save structured JSON, flattened CSV files, or properly named post images.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="detailed-guide" id="detailed-guide">
+        <div class="container">
+          <div class="detailed-heading">
+            <div class="eyebrow eyebrow-dark"><span></span> Complete beginner guide</div>
+            <h2>How to use InstaHarvest, step by step.</h2>
+            <p>Follow the sections below exactly. No programming knowledge is required.</p>
+          </div>
+
+          <div class="guide-toc" aria-label="Guide contents">
+            <a href="#guide-install"><span>1</span> Install</a>
+            <a href="#guide-first-harvest"><span>2</span> First harvest</a>
+            <a href="#guide-presets"><span>3</span> Presets</a>
+            <a href="#guide-custom"><span>4</span> Custom scope</a>
+            <a href="#guide-progress"><span>5</span> Monitor progress</a>
+            <a href="#guide-confirm"><span>6</span> Confirm lists</a>
+            <a href="#guide-controls"><span>7</span> Controls</a>
+            <a href="#guide-export"><span>8</span> Export</a>
+          </div>
+
+          <article class="walkthrough-card" id="guide-install">
+            <div class="walkthrough-copy">
+              <div class="walkthrough-number">1</div>
+              <h3>Install and open the extension</h3>
+              <ol class="mouse-steps">
+                <li><b>With a mouse:</b> Download <code>InstaHarvest.zip</code>, right-click it, and choose <b>Extract All</b>.</li>
+                <li>Open a Chrome tab and type <code>chrome://extensions</code> in the address bar. Press <b>Enter</b>.</li>
+                <li>Turn on <b>Developer mode</b> using the switch in the upper-right corner.</li>
+                <li>Click <b>Load unpacked</b>, then select the extracted folder that contains <code>manifest.json</code>.</li>
+                <li>Open Instagram, sign in, and click the Chrome puzzle-piece icon. Pin <b>InstaHarvest</b>.</li>
+              </ol>
+              <div class="mouse-tip"><span>●</span><b>Tip:</b> Keep the extracted folder on your computer. Moving or deleting it can disable the local extension.</div>
+            </div>
+            <figure class="walkthrough-figure">
+              <img src="images/chrome-setup.svg" alt="Chrome extensions developer mode and Load unpacked interface preview" />
+              <figcaption>Illustrated interface preview · Chrome extensions setup</figcaption>
+            </figure>
+          </article>
+
+          <article class="walkthrough-card walkthrough-reverse" id="guide-first-harvest">
+            <div class="walkthrough-copy">
+              <div class="walkthrough-number">2</div>
+              <h3>Start your first harvest</h3>
+              <ol class="mouse-steps">
+                <li>Open the InstaHarvest side panel by clicking its icon beside the Chrome address bar.</li>
+                <li>Click inside <b>Instagram profile</b>.</li>
+                <li>Type only the username, such as <code>your.profile</code>, or paste the complete Instagram profile URL.</li>
+                <li>For your first run, leave <b>Quick</b> selected. Quick collects profile details and up to 12 posts.</li>
+                <li>Click <b>Start</b>. Chrome opens or reloads the selected Instagram profile and starts collecting.</li>
+              </ol>
+              <div class="mouse-tip"><span>●</span><b>Tip:</b> Test on a small public profile or secondary account first.</div>
+            </div>
+            <figure class="walkthrough-figure">
+              <img src="images/main-panel.png" alt="InstaHarvest main panel with profile input and preset choices" />
+              <figcaption>Real interface · profile input, presets, and exports</figcaption>
+            </figure>
+          </article>
+
+          <article class="walkthrough-card" id="guide-presets">
+            <div class="walkthrough-copy">
+              <div class="walkthrough-number">3</div>
+              <h3>Choose the right preset</h3>
+              <div class="preset-guide">
+                <div><b>Quick</b><span>Good for a first test. Profile details plus 12 posts.</span></div>
+                <div><b>Deep</b><span>Collects posts, reels, followers, following, comments, likers, and carousel slides.</span></div>
+                <div><b>Custom</b><span>Lets you select exactly what to collect and set limits.</span></div>
+              </div>
+              <ol class="mouse-steps">
+                <li>Click one preset button once. The selected preset turns violet.</li>
+                <li>Read the short description below the presets before starting.</li>
+                <li>Use <b>Quick</b> or a small Custom limit while learning the interface.</li>
+              </ol>
+            </div>
+            <figure class="walkthrough-figure">
+              <img src="images/splash-screen.svg" alt="InstaHarvest splash screen interface preview" />
+              <figcaption>Illustrated interface preview · branded startup</figcaption>
+            </figure>
+          </article>
+
+          <article class="walkthrough-card walkthrough-reverse" id="guide-custom">
+            <div class="walkthrough-copy">
+              <div class="walkthrough-number">4</div>
+              <h3>Set a Custom harvest</h3>
+              <ol class="mouse-steps">
+                <li>Click <b>Custom</b>, then click the <b>Custom scope</b> heading to expand it.</li>
+                <li>Check Profile, Posts, Reels, Followers, Following, Comments, or Likers only when needed.</li>
+                <li>Leave <b>Carousel slides</b> checked if you want every image in a carousel.</li>
+                <li>Enter limits in the number boxes. Use <code>0</code> for no post limit where supported.</li>
+                <li>Comments and likers require Posts or Reels to be selected. Press <b>Start</b> only after the scope is correct.</li>
+              </ol>
+              <div class="mouse-tip"><span>●</span><b>Recommended:</b> Begin with Posts and Carousel slides enabled, then collect followers or following separately.</div>
+            </div>
+            <figure class="walkthrough-figure">
+              <img src="images/custom-scope.png" alt="InstaHarvest custom resource scope with limits" />
+              <figcaption>Real interface · Custom scope and limits</figcaption>
+            </figure>
+          </article>
+
+          <article class="walkthrough-card" id="guide-progress">
+            <div class="walkthrough-copy">
+              <div class="walkthrough-number">5</div>
+              <h3>Watch the harvest progress</h3>
+              <ol class="mouse-steps">
+                <li>After <b>Start</b>, the Harvest card appears below New harvest.</li>
+                <li>Read the profile name, status pill, progress bar, and each resource row.</li>
+                <li><b>Running</b> means work is active. <b>Waiting for you</b> means the extension needs a manual Instagram action.</li>
+                <li>The Activity log may be expanded at the bottom for timestamps and warnings.</li>
+              </ol>
+            </div>
+            <figure class="walkthrough-figure">
+              <img src="images/harvest-progress.svg" alt="Illustrated harvest progress and confirmation interface" />
+              <figcaption>Illustrated interface preview · running harvest</figcaption>
+            </figure>
+          </article>
+
+          <article class="walkthrough-card" id="guide-confirm">
+            <div class="walkthrough-copy">
+              <div class="walkthrough-number">6</div>
+              <h3>Confirm followers, following, or likers</h3>
+              <ol class="mouse-steps">
+                <li>When a confirmation card appears, do not click <b>Confirm</b> yet.</li>
+                <li>Switch to the Instagram tab using Chrome's tab row.</li>
+                <li>For followers or following, click the matching profile statistic. Leave the list dialog open.</li>
+                <li>For likers, open the post and click the likers / <b>liked by</b> dialog. Keep it open.</li>
+                <li>Close unrelated dialogs, switch back to the InstaHarvest panel, and click <b>Confirm</b>.</li>
+                <li>If the list is not detected, leave it open and use <b>Confirm</b> again. Use <b>Skip</b> only if you do not need that resource.</li>
+              </ol>
+              <div class="confirmation-previews">
+                <img src="images/follower-confirm.svg" alt="Follower confirmation illustration" />
+                <img src="images/liker-confirm.svg" alt="Liker confirmation illustration" />
+              </div>
+            </div>
+          </article>
+
+          <article class="walkthrough-card" id="guide-controls">
+            <div class="walkthrough-copy">
+              <div class="walkthrough-number">7</div>
+              <h3>Pause, resume, retry, or stop</h3>
+              <ol class="mouse-steps">
+                <li>Click <b>Pause</b> to stop a running loop. No new rows or clicks should start while paused.</li>
+                <li>Click <b>Resume</b> to continue the unfinished step.</li>
+                <li>Use <b>Stop</b> to finish the session early. A stopped harvest can be reviewed and exported.</li>
+                <li>If a step is marked Error, check the message and use <b>Retry</b> after correcting the Instagram view.</li>
+                <li>Use <b>New harvest</b> only after the current job is stopped or completed.</li>
+              </ol>
+              <div class="mouse-tip"><span>●</span><b>Close the panel safely:</b> The job state is saved locally. Reopening the panel can show the current progress.</div>
+            </div>
+            <figure class="walkthrough-figure">
+              <img src="images/harvest-controls.svg" alt="Pause resume and stop controls illustration" />
+              <figcaption>Illustrated interface preview · harvest controls</figcaption>
+            </figure>
+          </article>
+
+          <article class="walkthrough-card walkthrough-reverse" id="guide-export">
+            <div class="walkthrough-copy">
+              <div class="walkthrough-number">8</div>
+              <h3>Export your collected data</h3>
+              <ol class="mouse-steps">
+                <li>Scroll to the <b>Export</b> card. It shows the active profile and collected counts.</li>
+                <li>Click <b>Export JSON</b> for the most complete structured copy.</li>
+                <li>Click <b>Export CSV</b> for separate spreadsheet-friendly files.</li>
+                <li>Click <b>Export Post Images ZIP</b> to download image posts and carousels as PNG files.</li>
+                <li>Wait for the export status text. Do not close the side panel while a ZIP is being downloaded.</li>
+              </ol>
+              <div class="mouse-tip"><span>●</span><b>Good to know:</b> Reels and videos are not included in the post-image ZIP.</div>
+            </div>
+            <figure class="walkthrough-figure">
+              <img src="images/exports.svg" alt="JSON CSV and Post Images ZIP export illustration" />
+              <figcaption>Illustrated interface preview · export actions</figcaption>
+            </figure>
+          </article>
+
+          <article class="walkthrough-card" id="guide-settings">
+            <div class="walkthrough-copy">
+              <div class="walkthrough-number">9</div>
+              <h3>Check Activity log and Settings</h3>
+              <ol class="mouse-steps">
+                <li>Expand <b>Activity log</b> to read recent actions, warnings, and errors.</li>
+                <li>Expand <b>Settings</b> to adjust pacing, limits, and daily session limits.</li>
+                <li>Keep the minimum pacing at 700 ms or higher.</li>
+                <li>Click <b>Save settings</b> after changing values.</li>
+                <li>Use <b>Copy debug info</b> if you need to report a broken Instagram selector.</li>
+              </ol>
+            </div>
+            <figure class="walkthrough-figure">
+              <img src="images/activity-settings.svg" alt="Activity log and pacing settings illustration" />
+              <figcaption>Illustrated interface preview · log and settings</figcaption>
+            </figure>
+          </article>
+        </div>
+      </section>
+
+      <section class="privacy-section">
+        <div class="container privacy-card">
+          <div class="privacy-mark">✓</div>
+          <div>
+            <div class="eyebrow eyebrow-dark"><span></span> Local by design</div>
+            <h2>Your harvest stays in your browser.</h2>
+            <p>No cloud service, analytics backend, or telemetry. IndexedDB stores the data in this browser profile; exports are created on your device.</p>
+          </div>
+          <a class="button button-ghost" href="../README.md">Read the documentation</a>
+        </div>
+      </section>
+
+      <section class="safety-section">
+        <div class="container safety-card">
+          <strong>Use responsibly</strong>
+          <p>Automation may violate Instagram's Terms of Service and can affect account access. Use a secondary account and comply with applicable privacy laws.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container footer-grid">
+        <div class="footer-brand">
+          <img src="../icons/Icon-128.png" alt="" />
+          <div><strong>InstaHarvest</strong><small>Profile Data Studio</small></div>
+        </div>
+        <p>Local-first. No API. No cloud.</p>
+        <div class="footer-links">
+          <a href="../README.md">Documentation</a>
+          <a href="../LICENSE">License</a>
+          <a href="https://github.com/anurag-panda-dev/InstaHarvest" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://github.com/anurag-panda-dev/InstaHarvest/releases" target="_blank" rel="noopener">Releases</a>
+        </div>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>

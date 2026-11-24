@@ -205,14 +205,18 @@ export function findScrollable(root) {
   const candidates = [];
   const nodes = [root, ...S.selectAll('scrollDescendants', root)];
   for (const node of nodes) {
-    if (!node || node === root) {
-      if (node === root && node.scrollHeight > node.clientHeight + 8) candidates.push(node);
+    if (!node) continue;
+    if (node.scrollHeight <= node.clientHeight + 8) continue;
+    if (node === root) {
+      candidates.push(node);
       continue;
     }
-    if (node.scrollHeight <= node.clientHeight + 8) continue;
     const style = getComputedStyle(node);
     const overflowY = style.overflowY;
-    if (overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay') {
+    const rect = node.getBoundingClientRect();
+    if (rect.width > 80 && rect.height > 100 &&
+        (overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay' ||
+         node.getAttribute('role') === 'dialog')) {
       candidates.push(node);
     }
   }

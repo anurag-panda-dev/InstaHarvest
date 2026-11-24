@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://anurag-panda-dev.github.io/InstaHarvest/guide-page/sitemap.xml

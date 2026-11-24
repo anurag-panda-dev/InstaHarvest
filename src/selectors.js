@@ -70,10 +70,14 @@ export const SELECTORS = {
     'main span'
   ]),
   followersLink: def('followersLink', 'Link that opens the followers list', 'header a[href$="/followers/"]', [
-    'a[href$="/followers/"]'
+    'header a[href*="/followers"]',
+    'a[href*="/followers"]',
+    'a[href="/followers/"]'
   ]),
   followingLink: def('followingLink', 'Link that opens the following list', 'header a[href$="/following/"]', [
-    'a[href$="/following/"]'
+    'header a[href*="/following"]',
+    'a[href*="/following"]',
+    'a[href="/following/"]'
   ]),
   metaTitle: def('metaTitle', 'og:title meta tag', 'meta[property="og:title"]', [
     'meta[name="twitter:title"]'
@@ -87,8 +91,13 @@ export const SELECTORS = {
   gridLink: def(
     'gridLink',
     'Links to individual posts/reels in the profile grid',
-    'main a[href^="/p/"], main a[href^="/reel/"]',
-    ['article a[href^="/p/"], article a[href^="/reel/"]', 'a[href^="/p/"]']
+    'main a[href*="/p/"], main a[href*="/reel/"], main a[href*="/reels/"]',
+    [
+      'article a[href*="/p/"], article a[href*="/reel/"], article a[href*="/reels/"]',
+      'a[href*="/p/"]',
+      'a[href*="/reel/"]',
+      'a[href*="/reels/"]'
+    ]
   ),
   gridImage: def('gridImage', 'Thumbnail image inside a grid tile', 'img[srcset], img[src]'),
   gridVideo: def('gridVideo', 'Video inside a grid tile', 'video'),

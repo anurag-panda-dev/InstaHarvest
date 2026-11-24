@@ -7,12 +7,28 @@
     <link rel="stylesheet" href="panel.css" />
   </head>
   <body>
+    <div id="splashScreen" class="splash-screen" role="status" aria-live="polite">
+      <div class="splash-orb splash-orb-one"></div>
+      <div class="splash-orb splash-orb-two"></div>
+      <div class="splash-card">
+        <div class="splash-logo-wrap">
+          <img class="splash-logo" src="../../icons/Icon-128.png" alt="InstaHarvest" />
+          <span class="splash-spark splash-spark-one">✦</span>
+          <span class="splash-spark splash-spark-two">✦</span>
+        </div>
+        <div class="splash-title">InstaHarvest</div>
+        <div class="splash-tag">Profile Data Studio</div>
+        <div class="splash-progress" aria-hidden="true"><span></span></div>
+        <div class="splash-status">Preparing your workspace…</div>
+      </div>
+    </div>
+
     <header class="app-header">
       <div class="brand">
         <img class="brand-icon" src="../../icons/Icon-48.png" alt="" />
         <div class="brand-text">
           <div class="brand-name">InstaHarvest</div>
-          <div class="brand-tag">Local-first profile data</div>
+          <div class="brand-tag">Profile Data Studio</div>
         </div>
       </div>
       <div class="header-right">
@@ -123,6 +139,7 @@
         <div class="row">
           <button id="exportJsonBtn" class="btn btn-secondary" type="button">Export JSON</button>
           <button id="exportCsvBtn" class="btn btn-ghost" type="button">Export CSV</button>
+          <button id="exportZipBtn" class="btn btn-ghost" type="button">Export Post Images ZIP</button>
         </div>
         <p id="exportNote" class="hint"></p>
       </section>

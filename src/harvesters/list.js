@@ -26,7 +26,8 @@ function extractRow(link) {
   if (!username) return null;
   const img = S.select('listRowImage', link);
   const avatar = img ? largestSrcset(img) : '';
-  if (!img) return null; // rows always carry an avatar; avoids stray links
+  // A lazy avatar may not be rendered yet. The profile link is enough to
+  // preserve the account and lets a later mount merge its avatar in.
 
   const spans = S.selectAll('listRowText', link)
     .map((el) => text(el))
@@ -77,8 +78,8 @@ function mergeRow(map, row) {
 export async function harvestVirtualList({
   dialog,
   maxItems = 0,
-  maxRounds = 90,
-  stableRounds = 4,
+  maxRounds = 180,
+  stableRounds = 6,
   pacing = { min: 700, max: 1200 },
   onProgress = () => {},
   shouldAbort = () => false
@@ -117,6 +118,7 @@ export async function harvestVirtualList({
   const scroller = findScrollable(dlg);
   let stable = 0;
   let rounds = 0;
+  let stalledProbes = 0;
   let stopped = 'stable';
 
   while (true) {
@@ -139,7 +141,8 @@ export async function harvestVirtualList({
 
     const before = map.size;
     const target = scroller || dlg;
-    const delta = Math.round(((target.clientHeight || window.innerHeight) * 0.9));
+    const beforeTop = target.scrollTop;
+    const delta = Math.round(((target.clientHeight || window.innerHeight) * 0.55));
     if (target === document.scrollingElement || target === document.documentElement) {
       window.scrollBy(0, delta);
     } else if (typeof target.scrollBy === 'function') {
@@ -163,8 +166,36 @@ export async function harvestVirtualList({
     });
 
     if (stable >= stableRounds) {
-      stopped = atBottom(target) ? 'bottom' : 'stable';
-      break;
+      if (atBottom(target)) {
+        stopped = 'bottom';
+        break;
+      }
+
+      const links = S.selectAll('listRowLink', dlg);
+      const lastLink = links[links.length - 1];
+      if (lastLink) {
+        try {
+          lastLink.scrollIntoView({ block: 'end', inline: 'nearest' });
+        } catch {
+          /* fallback to the next scroll increment */
+        }
+      }
+
+      await humanPause(pacing.min, pacing.max);
+      harvestRows();
+      rounds++;
+
+      if (target.scrollTop === beforeTop && map.size <= before) {
+        stalledProbes++;
+      } else {
+        stalledProbes = 0;
+      }
+
+      if (stalledProbes >= 2) {
+        stopped = 'stable';
+        break;
+      }
+      stable = 0;
     }
   }
 
@@ -176,12 +207,19 @@ export async function harvestVirtualList({
 
 export async function openListDialog(resource, pacing = { min: 700, max: 1200 }) {
   const selName = resource === 'following' ? 'followingLink' : 'followersLink';
-  const link = S.select(selName);
+  let link = S.select(selName);
+  if (!link) {
+    const pattern = resource === 'following' ? /^following$/i : /^followers$/i;
+    const textTarget = S.findText(document, pattern, { within: S.select('profileHeader') || document.body });
+    link = textTarget?.closest('a, [role="button"]') || textTarget;
+  }
   if (!link) {
     S.reportBroken(selName, 'openListDialog');
     throw new Error(`Could not find the ${resource} link on this profile. Open the list manually, then press Confirm.`);
   }
-  clickElement(link);
+  if (!clickElement(link)) {
+    throw new Error(`Could not click the ${resource} link. Open the list manually, then press Confirm.`);
+  }
   await humanPause(pacing.min, pacing.max);
 
   const deadline = Date.now() + 5000;
