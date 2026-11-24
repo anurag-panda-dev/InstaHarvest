@@ -20,7 +20,7 @@
 <p align="center">
   <a href="https://github.com/anurag-panda-dev/InstaHarvest">GitHub repository</a> •
   <a href="https://github.com/anurag-panda-dev/InstaHarvest/releases">Releases</a> •
-  <a href="https://github.com/anurag-panda-dev/InstaHarvest/releases/latest/download/InstaHarvest.zip">Direct release ZIP</a>
+  <a href="https://github.com/anurag-panda-dev/InstaHarvest/archive/refs/tags/v1.0.0.zip">Direct release ZIP</a>
 </p>
 
 <p align="center">
@@ -109,7 +109,7 @@ The `_2`, `_3`, and later suffixes identify carousel slides. Reels and videos ar
 
 ### Download a release
 
-- **[Download the latest InstaHarvest ZIP](https://github.com/anurag-panda-dev/InstaHarvest/releases/latest/download/InstaHarvest.zip)**
+- **[Download the InstaHarvest v1.0.0 ZIP](https://github.com/anurag-panda-dev/InstaHarvest/archive/refs/tags/v1.0.0.zip)**
 - [View all GitHub releases](https://github.com/anurag-panda-dev/InstaHarvest/releases)
 - [View the source repository](https://github.com/anurag-panda-dev/InstaHarvest)
 
