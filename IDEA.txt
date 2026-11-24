@@ -1,0 +1,379 @@
+# IDEA.md
+
+# InstaHarvest (Instagram Profile Scraper — Chrome Extension)
+
+tagline "Local-first Instagram profile data, in your browser."
+
+InstaHarvest — Collect a profile's posts, followers, comments, and likers — locally, in your browser. No account API. No cloud. Just your data, organized and exportable. (Keep the voice technical, honest, local-first. Avoid words like "unlimited," "bypass," "crack," "secret." The brand should reassure a cautious user that the tool is safe to try on a secondary account.)
+
+**Status:** Ready to build
+**Owner:** Anurag Panda
+**Audience:** Developers and coding agents implementing this extension
+
+---
+
+## 1. One-line summary
+
+A Manifest V3 Chrome extension that scrapes a public Instagram profile's full data (details, followers, following, posts, carousels, reels, likers, comment threads) **using only DOM manipulation in the user's logged-in browser session** — no official API, no internal endpoints, no backend, no telemetry.
+
+---
+
+## 2. Goals & non-goals
+
+### Goals
+- Extract, from a logged-in `instagram.com` tab, via DOM only:
+  - Profile details: username, full name, bio, profile pic, follower count, following count, post count, verification badge, external link, category.
+  - Followers list and following list (usernames, full names, avatars, profile links).
+  - All posts: shortcode, media type, caption, like count, comment count, timestamp.
+  - Carousel media: every image/video slide per post.
+  - Reels: same fields as posts, separated by tab.
+  - Likers per post: username, full name, avatar — harvested via a **user-paced Confirm flow** (user opens the likers modal; extension harvests it).
+  - Comments per post: full nested thread tree (top-level + all replies), with author, text, timestamp.
+- Persist everything locally in IndexedDB; support resume after tab close / worker death.
+- Export to JSON (full fidelity) and CSV (flattened).
+- Ship an "advanced but easy" UX: side panel, per-resource progress, presets, caps, pause/resume.
+
+### Non-goals (explicitly out of scope)
+- ❌ Determining whether a liker follows the user, or whether the user follows a liker. **Dropped by design** — no per-liker navigation.
+- ❌ Any call to Instagram's internal HTTP endpoints (`/api/v1/...`, `/graphql/...`). **DOM only.**
+- ❌ Any official Instagram API, OAuth, or developer app.
+- ❌ Any third-party server, proxy, or cloud storage. Everything stays in the browser.
+- ❌ Bypassing or defeating rate limits. We pace and cap; we do not evade.
+
+---
+
+## 3. Hard constraints (read before writing code)
+
+1. **DOM only.** All extraction happens by reading and interacting with the rendered page. No `fetch()` to Instagram from the extension.
+2. **Logged-in session required.** The user must be logged into Instagram in the active tab. The extension assumes this and surfaces a clear error if not.
+3. **Manifest V3.** Service worker architecture, side panel UI.
+4. **Single-threaded pacing.** Never parallelize scraping actions. One harvest loop at a time.
+5. **Human-like pacing.** Every automated scroll/click is followed by a randomized delay (default 700–1200 ms). No max-speed loops.
+6. **Daily caps + session caps.** Configurable hard stops. The tool must be safe to use repeatedly.
+7. **Selectors live in one file.** `selectors.js`. No selectors inlined anywhere else. Instagram rotates obfuscated classes; we depend on ARIA roles, `href` patterns, visible button text, and structural relationships only.
+8. **No secrets, no telemetry, no remote logging.** The extension must be auditable and privacy-safe by inspection.
+
+---
+
+## 4. Architecture
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  Side Panel (UI)                                              │
+│  - profile input, presets, per-resource progress, queue cards │
+│  - Confirm buttons for modal-based harvests                   │
+│  - export buttons, settings (pacing, caps)                    │
+└───────────────▲──────────────────────────────────────────────┘
+                │ chrome.runtime messages
+┌───────────────┴──────────────────────────────────────────────┐
+│  Service Worker (background.js)                               │
+│  - orchestrates job queue (persisted in IndexedDB)            │
+│  - routes messages between panel and content script           │
+│  - survives worker death; resumes on wake                     │
+│  - performs NO network calls                                  │
+└───────────────▲──────────────────────────────────────────────┘
+                │ chrome.tabs.sendMessage
+┌───────────────┴──────────────────────────────────────────────┐
+│  Content Script (runs on instagram.com)                       │
+│  - the ONLY component that touches the DOM                    │
+│  - harvest loops: profile, grid, followers, following,        │
+│    carousels, reels, comments, likers                         │
+│  - virtualized-list handling via MutationObserver             │
+│  - streams progress back to panel                             │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**Why this split:** the content script owns all DOM access (single place to maintain selectors and pacing). The service worker owns orchestration and persistence. The panel owns UX. No component crosses these boundaries.
+
+---
+
+## 5. Data extraction plan (DOM only)
+
+All extraction uses **stable selectors** defined in `selectors.js`:
+- ARIA roles: `role="dialog"`, `role="button"`, `role="tab"`
+- Attribute patterns: `a[href^="/"]`, `img[srcset]`, `video`
+- Visible button text: `Next`, `View replies`, `Load more`, `Follow`, `Following`, `liked by`, `others`
+- Structural nesting (parent/child `div` relationships within a comment container)
+
+### 5.1 Profile header
+Read from the profile page DOM: username (`h2` / header link text), full name, bio (`div` with `-webkit-line-clamp` style or header structure), profile pic (`img` with largest `srcset`), stats (`<span>` next to "followers"/"following"/"posts" labels), verification (`svg[aria-label*="Verified"]`), external link (`a[href]` in bio).
+
+### 5.2 Posts grid
+- Auto-scroll the profile grid until no new post tiles mount for N stable rounds.
+- Each tile → `a[href^="/p/"]` or `a[href^="/reel/"]` → capture shortcode.
+- Capture thumbnail `img` (largest `srcset` candidate) and `video` poster if present.
+
+### 5.3 Post detail (per post)
+- Navigate the user (or extension, paced) into the post view.
+- Extract: caption text, like count, comment count, timestamp (`time[datetime]`), author.
+- **Carousel:** if `button[aria-label="Next"]` (or equivalent) exists, click it, capture each slide's `img` (largest srcset) or `video` element; repeat until Next is disabled or absent.
+- **Reels:** identified by URL pattern `/reel/` or presence of reel UI; same field extraction.
+
+### 5.4 Followers / Following — **user-paced Confirm flow (reused pattern)**
+- Panel prompts: "Open the followers list on this profile, then click Confirm."
+- On Confirm, content script polls for the dialog (up to ~10 s). If absent, hint the user.
+- Harvest loop: `MutationObserver` on the scroll container **plus** periodic scroll-by; capture `a[href^="/"]` rows into a `Map` keyed by username before they unmount (virtualized list).
+- Stop when no new rows for 4 stable rounds or `maxRounds` cap hit.
+- Same function reused for following and likers.
+
+### 5.5 Likers — **user-paced Confirm flow**
+- After all automatic scraping is done, the panel presents a queue of posts.
+- For each post, prompt: "Open this post's 'liked by' list, then Confirm."
+- Content script verifies the likers dialog is open, then harvests with the shared virtualized-list harvester.
+- Per-post progress saved immediately; the queue advances; user can skip, stop, or resume later.
+
+### 5.6 Comments + threads
+- In post view, trigger "Load more comments" until exhausted (bounded by a cap).
+- For each top-level comment, find "View replies" / "View N replies" button; click to expand.
+- Reconstruct nested tree by walking child containers within each comment container.
+- Extract per node: author username, full name, text, timestamp, avatar.
+
+### 5.7 Shared virtualized-list harvester (single implementation)
+One function, parameterized by `{ containerLocator, rowExtractor, keyFn, maxRounds, stableRounds }`, used for:
+- Followers
+- Following
+- Likers
+- Comments (top-level and replies)
+
+**Behavior:**
+- Find scroll container inside the relevant region.
+- Attach `MutationObserver` (`childList: true, subtree: true`) to capture rows as they mount.
+- Loop: harvest current rows → gentle `scrollBy` → randomized `sleep(700–1200ms)` → check stability.
+- Terminate on `stableRounds` consecutive no-growth rounds or `maxRounds` cap.
+- Return deduped array via `Map` keyed by username or comment id.
+
+---
+
+## 6. UX specification
+
+### 6.1 Side panel layout
+- **Header:** profile input (username or URL paste), "Start" button, current status badge.
+- **Presets:** Quick (profile + first 12 posts), Deep (all resources), Custom (checkboxes per resource + caps).
+- **Progress cards (one per resource):** label, counter (`340/1200`), ETA, state pill (`pending / running / waiting for you / done / stopped / error`).
+- **Confirm prompt card:** appears for followers/following/likers phases. Shows exactly which button to click in Instagram, a big **Confirm** button, and a **Skip** / **Cancel** option.
+- **Log panel (collapsible):** recent actions, selector warnings, errors.
+- **Controls:** Pause, Resume, Stop, Export JSON, Export CSV.
+- **Settings:** pacing slider (700–2000 ms), per-resource caps (max followers, max following, max likers per post, max comments per post), daily cap (max profiles per day / max minutes per day).
+
+### 6.2 States & feedback
+- Every resource reports live counts. No silent operations.
+- On error: inline card with error message + "Retry" + "Copy debug info."
+- On selector break (a selector returns 0 nodes when it shouldn't): surface a warning "Instagram UI may have changed — a selector needs update" and log which selector.
+
+### 6.3 Safety affordances
+- Daily cap reached → hard stop, clear message, auto-suggest waiting.
+- Session duration > configurable threshold → gentle "consider taking a break" warning.
+- If the user is not logged in or the tab is not on `instagram.com` → block start with a clear message.
+
+---
+
+## 7. Storage & resume (IndexedDB)
+
+### 7.1 Schema (conceptual)
+
+```
+profiles:      { username, scrapedAt, details: {...}, counts: {...} }
+followers:     { profileUsername, users: [{username, fullName, avatar}] }
+following:     { profileUsername, users: [...] }
+posts:         { profileUsername, shortcode, type, caption, likeCount,
+                 commentCount, timestamp, carousel: [{type, url, w, h}],
+                 thumbnail }
+comments:      { shortcode, tree: [ { author, text, ts, children: [...] } ] }
+likers:        { shortcode, users: [{username, fullName, avatar}], done }
+jobs:          { profileUsername, queue: [ {resource, shortcode?, state, count} ],
+                 paused, startedAt, dailyCounter }
+```
+
+### 7.2 Resume rules
+- Service worker writes every completed unit (a page of followers, a post, a comment tree) to IndexedDB immediately.
+- On worker wake or panel reopen, load `jobs`, reconcile with stored data, and resume the first unfinished unit.
+- Likers queue persists per post with `done` flag; reopening the panel highlights the first `!done` post.
+
+### 7.3 Export
+- **JSON:** full nested structure, one file per profile (`profile_<username>_<timestamp>.json`).
+- **CSV:** flattened rows per resource, separate CSV per resource type (`followers.csv`, `posts.csv`, `comments.csv` flattened with `parent_id`, `likers.csv`). Generated in the panel from IndexedDB; downloaded via `URL.createObjectURL`. Bundle a small CSV-escaping helper (or `papaparse`) — no remote calls.
+
+---
+
+## 8. Message protocol (content ⇄ worker ⇄ panel)
+
+All messages are `{ type, payload }`. Every long-running content-script handler responds asynchronously (`return true` in `onMessage`).
+
+| Type | Direction | Purpose |
+|---|---|---|
+| `START_JOB` | panel → worker | Begin scraping a profile with a preset/config |
+| `PAUSE` / `RESUME` / `STOP` | panel → worker | Control the job |
+| `HARVEST_PROFILE` | worker → content | Read header + grid |
+| `HARVEST_LIST` | worker → content | Harvest followers/following/likers (payload specifies which; requires Confirm) |
+| `HARVEST_POST` | worker → content | Read one post (caption, carousel, reels) |
+| `HARVEST_COMMENTS` | worker → content | Build comment thread tree for a shortcode |
+| `CHECK_LIKERS_DIALOG` | worker → content | Verify the likers modal is open |
+| `PROGRESS` | content → worker → panel | Stream counters/status per resource |
+| `NEED_CONFIRM` | content/worker → panel | Surface a Confirm prompt for the next modal |
+| `ERROR` | content → worker → panel | Surface a recoverable error with context |
+
+The worker is the single source of truth for job state; the panel is a thin view over worker state.
+
+---
+
+## 9. Pacing & safety (non-negotiable rules)
+
+- **Every scroll** in a harvest loop is followed by `sleep(700–1200ms)` randomized.
+- **Every click** (Next slide, View replies, Load more) is followed by `sleep(500–1000ms)`.
+- **One harvest loop at a time.** The worker enforces a single active content-script task.
+- **Caps are enforced by the worker**, not the content script (so they can't be bypassed by a stuck loop):
+  - `maxFollowers`, `maxFollowing`, `maxLikersPerPost`, `maxCommentsPerPost` (user-configurable).
+  - `maxProfilesPerDay`, `maxMinutesPerDay` (hard stops with clear messaging).
+- **Stable-round termination** prevents infinite loops on lazy-load stalls.
+- **Session warnings** at a configurable elapsed-time threshold.
+- **Test on a secondary account first.** Document this prominently in the README.
+
+---
+
+## 10. Selector strategy (maintenance policy)
+
+- All selectors live in `src/selectors.js` as a single exported object.
+- Each selector is an object `{ name, query, fallbacks: [...], description, lastVerified }`.
+- Resolution order: try primary; on 0 results, try fallbacks; on total failure, emit a `SELECTOR_BROKEN` warning with the selector name and description so a dev can fix quickly.
+- **Forbidden:** obfuscated class names (e.g., `._aagv`, `.x1i10hfl`). They rotate and break builds.
+- **Allowed:** `role`, `aria-*`, `href` patterns, `data-*` attributes, visible text, tag + structural position.
+- The README documents the selector-update workflow: reproduce, inspect DOM, update `selectors.js`, bump `lastVerified`, test.
+
+---
+
+## 11. File layout
+
+```
+extension/
+  manifest.json
+  src/
+    background.js          # service worker: job state, message routing, caps
+    content.js             # injects harvesters; owns DOM
+    harvesters/
+      profile.js
+      grid.js
+      list.js              # shared virtualized-list harvester
+      post.js              # post detail + carousel + reels
+      comments.js          # thread tree builder
+      likers.js            # Confirm-flow wrapper around list.js
+    panel/
+      panel.html
+      panel.js             # UI
+      panel.css
+    storage/
+      db.js                # IndexedDB wrapper (idb)
+      schema.js
+      export.js            # JSON + CSV export
+    selectors.js
+    messages.js            # message type constants
+    pacing.js              # sleep, jitter, cap helpers
+  icons/
+  README.md                # safety notes, selector-update workflow, test plan
+```
+
+---
+
+## 12. Build order (milestones)
+
+1. **M1 — Skeleton (1–2 days):** MV3 manifest, side panel shell, content script injection, message round-trip, `selectors.js` scaffold.
+2. **M2 — Profile + grid (2–3 days):** header parse, grid harvest with virtualized handling, save to IndexedDB.
+3. **M3 — Followers/following (2–3 days):** Confirm flow + shared list harvester, wired to panel.
+4. **M4 — Posts, carousels, reels (3–4 days):** per-post detail, slide click-through, save.
+5. **M5 — Comments + threads (4–5 days):** expand replies, tree reconstruction, cap handling.
+6. **M6 — Likers via Confirm flow (2–3 days):** per-post queue, handshake, save.
+7. **M7 — UX polish + export + caps (3–4 days):** presets, settings, resume, JSON/CSV export, safety messaging.
+8. **M8 — QA + docs (2–3 days):** secondary-account testing, selector-break rehearsal, README.
+
+**Target: ~3–4 weeks of focused solo work for a solid v1.**
+
+---
+
+## 13. Definition of done (per resource)
+
+A resource is "done" when:
+- It runs end-to-end on a live logged-in Instagram tab.
+- It reports live progress and completes with a correct count.
+- It persists to IndexedDB and survives a tab close + reopen (resume works).
+- It respects the configured caps and pacing.
+- Its selectors are all in `selectors.js` with fallbacks and a `lastVerified` date.
+- It produces correct JSON and CSV exports.
+- It degrades gracefully on selector break (warning + debug info, no crash).
+- It has been exercised on a secondary account without triggering an action block.
+
+---
+
+## 14. Risks & mitigations
+
+| Risk | Impact | Mitigation |
+|---|---|---|
+| Instagram DOM redesign breaks selectors | Feature stops working | Single `selectors.js`, ARIA/structural only, fallbacks, `SELECTOR_BROKEN` warning, documented update workflow |
+| Account action block from volume/velocity | User harm | Pacing (700–1200 ms), single-loop concurrency, per-resource caps, daily caps, session warnings, secondary-account testing mandate |
+| Virtualized lists lose rows | Incomplete data | `MutationObserver` + scroll loop + stable-round termination; dedupe via `Map` |
+| Service worker killed mid-job (MV3) | Job stalls | All state in IndexedDB; resume on wake; per-unit persistence |
+| Likers modal not open when Confirm pressed | Harvest fails silently | `CHECK_LIKERS_DIALOG` precheck with forgiving retry hint |
+| Carousel Next button variation | Missed slides | Multiple selector fallbacks; verify slide count vs. dot indicators where available |
+| Comment "View replies" text varies by locale | Replies not expanded | Match on multiple patterns and ARIA; locale-agnostic where possible |
+| Data privacy / GDPR concerns | Legal | Local-only storage, no telemetry, README notes on personal-data handling |
+
+---
+
+## 15. README must include (safety & ops)
+
+- Prominent **"Use a secondary account. This violates Instagram's ToS and can get accounts action-blocked or disabled."**
+- **"There is no such thing as unlimited rate."** Explain pacing/caps and why.
+- Data-privacy note: scraping others' followers/likers produces personal data; use responsibly and lawfully (GDPR/CCPA/DPDP).
+- Selector-update workflow (reproduce → inspect → update `selectors.js` → bump `lastVerified` → test).
+- Test plan: secondary account, small private test profile, verify resume, verify caps, rehearse selector break.
+- No-telemetry statement.
+
+---
+
+## 16. Explicitly rejected approaches (do not implement)
+
+- ❌ Any `fetch()`/`XHR` to Instagram endpoints.
+- ❌ Any official Instagram API or OAuth flow.
+- ❌ Per-liker profile navigation to determine follow-status.
+- ❌ Auto-opening likers modals without user confirmation.
+- ❌ Parallel scraping loops.
+- ❌ Speed-maximizing scroll loops.
+- ❌ Obfuscated class selectors.
+- ❌ Any remote backend, proxy, or telemetry.
+
+---
+
+## 17. One-paragraph brief for coding agents
+
+> Build a Manifest V3 Chrome extension that scrapes a logged-in Instagram profile via **DOM manipulation only**. The content script owns all DOM access and implements paced harvest loops for: profile header, post grid, followers/following/likers (shared virtualized-list harvester gated by a **user Confirm** flow), per-post detail including carousels and reels, and nested comment threads. The service worker owns job state, caps, and message routing, and persists everything to IndexedDB for resume. The side panel provides a per-resource progress UI, Confirm prompts, settings (pacing and caps), and JSON/CSV export. No network calls to Instagram. No official API. No follow-status enrichment. All selectors live in a single `selectors.js` using ARIA/structural patterns with fallbacks and a `SELECTOR_BROKEN` warning. Pacing is 700–1200 ms per action with randomized jitter; concurrency is strictly 1; caps are enforced by the worker. Follow the milestones in §12 and the definition of done in §13.
+
+
+Color palette
+The brand should feel trustworthy, technical, and local-first — not neon "hacker tool." A calm, data-tool palette distinguishes you from the sketchy scrapers in the store.
+
+Primary palette
+Role	Color	Hex	Usage
+Primary	Deep Indigo	#2D2A6E	Logo base, headers, primary buttons
+Accent	Harvest Amber	#F5A524	Highlights, progress bars, active states, the "harvest" spark
+Secondary	Slate Teal	#1F8A70	Success states, "done" pills, secondary buttons
+Neutral dark	Ink	#111827	Text, outlines
+Neutral mid	Fog	#6B7280	Secondary text, disabled
+Surface	Paper	#F9FAFB	Panel background
+Danger	Signal Red	#DC2626	Errors, stop button, caps reached
+Why this palette
+Deep Indigo reads as "data tool / dashboard" and contrasts well against Instagram's gradient without imitating it (avoid Instagram pink/purple — don't look like an Instagram product).
+
+Harvest Amber gives the "collect/extract" metaphor a warm, optimistic accent. It's the color of the spark in the logo.
+
+Slate Teal for success keeps the palette from being only indigo + amber and signals "done/safe."
+
+Neutral greys keep the UI calm so progress data stands out.
+
+Dark mode (optional, recommended for dev audience)
+Background: #0B0F1A
+
+Surface: #151A2A
+
+Primary stays #2D2A6E (lifted to #3D3A9E for contrast)
+
+Accent stays #F5A524
+
+Text: #E5E7EB

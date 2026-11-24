@@ -1,0 +1,13 @@
+const fs = require('fs');
+const html = fs.readFileSync('src/panel/panel.html', 'utf8');
+const js = fs.readFileSync('src/panel/panel.js', 'utf8');
+const all = [...html.matchAll(/id="([^"]+)"/g)].map((m) => m[1]);
+const ids = new Set(all);
+const used = [...new Set([...js.matchAll(/\$\('([^']+)'\)/g)].map((m) => m[1]))];
+const missing = used.filter((id) => !ids.has(id));
+const counts = {};
+for (const id of all) counts[id] = (counts[id] || 0) + 1;
+console.log('html ids:', ids.size, 'used:', used.length, 'missing:', missing);
+console.log('duplicate ids:', Object.entries(counts).filter(([, c]) => c > 1));
+const unused = [...ids].filter((id) => !used.includes(id));
+console.log('unused ids:', unused);

@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en" data-theme="auto">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>InstaHarvest</title>
+    <link rel="stylesheet" href="panel.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="brand">
+        <img class="brand-icon" src="../../icons/Icon-48.png" alt="" />
+        <div class="brand-text">
+          <div class="brand-name">InstaHarvest</div>
+          <div class="brand-tag">Local-first profile data</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <span id="statusBadge" class="badge badge-idle">Idle</span>
+        <button id="themeBtn" class="icon-btn" type="button" title="Toggle theme" aria-label="Toggle theme">◐</button>
+      </div>
+    </header>
+
+    <main class="stack">
+      <section class="card">
+        <div class="card-head">
+          <h2>New harvest</h2>
+          <span class="hint-inline">DOM only · your browser</span>
+        </div>
+
+        <label class="field-label" for="profileInput">Instagram profile</label>
+        <div class="row">
+          <input id="profileInput" type="text" spellcheck="false" autocomplete="off" placeholder="username or profile URL" />
+          <button id="startBtn" class="btn btn-primary" type="button">Start</button>
+        </div>
+        <div id="setupError" class="inline-error" hidden></div>
+
+        <div class="presets" role="group" aria-label="Preset">
+          <button class="chip" data-preset="quick" type="button">Quick</button>
+          <button class="chip" data-preset="deep" type="button">Deep</button>
+          <button class="chip" data-preset="custom" type="button">Custom</button>
+        </div>
+        <p class="hint" id="presetHint"></p>
+
+        <details id="customBox" class="custom">
+          <summary>Custom scope</summary>
+          <div class="checks">
+            <label><input type="checkbox" data-res="profile" /> Profile details</label>
+            <label><input type="checkbox" data-res="posts" /> Posts</label>
+            <label><input type="checkbox" data-res="reels" /> Reels</label>
+            <label><input type="checkbox" data-res="followers" /> Followers</label>
+            <label><input type="checkbox" data-res="following" /> Following</label>
+            <label><input type="checkbox" data-res="comments" /> Comments</label>
+            <label><input type="checkbox" data-res="likers" /> Likers</label>
+            <label><input type="checkbox" data-res="carousel" /> Carousel slides</label>
+          </div>
+          <div class="caps-grid">
+            <label>Max posts <input id="capPosts" type="number" min="0" step="1" /></label>
+            <label>Max followers <input id="capFollowers" type="number" min="0" step="50" /></label>
+            <label>Max following <input id="capFollowing" type="number" min="0" step="50" /></label>
+            <label>Max likers / post <input id="capLikers" type="number" min="0" step="50" /></label>
+            <label>Max comments / post <input id="capComments" type="number" min="0" step="50" /></label>
+          </div>
+        </details>
+      </section>
+
+      <section class="card" id="progressCard" hidden>
+        <div class="card-head">
+          <h2>Harvest</h2>
+          <span id="jobMeta" class="hint-inline"></span>
+        </div>
+        <div class="job-line">
+          <strong id="jobProfile">@</strong>
+          <span id="jobState" class="state-pill state-pending">pending</span>
+        </div>
+        <div class="bar"><div id="jobBar" class="bar-fill"></div></div>
+        <div id="stepsList" class="steps"></div>
+        <div id="jobMessage" class="job-message" hidden></div>
+        <div id="jobError" class="inline-error" hidden>
+          <span id="jobErrorText"></span>
+          <button id="retryInlineBtn" class="link-btn" type="button">Retry</button>
+        </div>
+        <div id="selectorsWarning" class="inline-warn" hidden></div>
+      </section>
+
+      <section class="card confirm" id="confirmCard" hidden>
+        <div class="card-head">
+          <h2 id="confirmTitle">Confirm</h2>
+          <span class="badge badge-waiting">waiting for you</span>
+        </div>
+        <p id="confirmInstruction" class="confirm-text"></p>
+        <p id="confirmWarning" class="inline-warn" hidden></p>
+        <div class="confirm-actions">
+          <button id="confirmBtn" class="btn btn-primary" type="button">Confirm</button>
+          <button id="openBtn" class="btn btn-ghost" type="button" hidden>Open it for me</button>
+        </div>
+        <div class="confirm-secondary">
+          <button id="skipBtn" class="link-btn" type="button">Skip this step</button>
+          <button id="cancelBtn" class="link-btn danger-text" type="button">Cancel harvest</button>
+        </div>
+      </section>
+
+      <section class="card" id="controlsCard" hidden>
+        <div class="controls">
+          <button id="pauseBtn" class="btn btn-ghost" type="button">Pause</button>
+          <button id="resumeBtn" class="btn btn-primary" type="button" hidden>Resume</button>
+          <button id="retryBtn" class="btn btn-ghost" type="button" hidden>Retry</button>
+          <button id="stopBtn" class="btn btn-danger-ghost" type="button">Stop</button>
+          <button id="newBtn" class="btn btn-ghost" type="button" hidden>New harvest</button>
+        </div>
+        <div class="controls-secondary">
+          <button id="debugBtn" class="link-btn" type="button">Copy debug info</button>
+        </div>
+        <p id="sessionNote" class="hint" hidden></p>
+      </section>
+
+      <section class="card" id="exportCard">
+        <div class="card-head">
+          <h2>Export</h2>
+          <span id="exportProfile" class="hint-inline">—</span>
+        </div>
+        <p id="exportCounts" class="hint">No data yet.</p>
+        <div class="row">
+          <button id="exportJsonBtn" class="btn btn-secondary" type="button">Export JSON</button>
+          <button id="exportCsvBtn" class="btn btn-ghost" type="button">Export CSV</button>
+        </div>
+        <p id="exportNote" class="hint"></p>
+      </section>
+
+      <section class="card log-card">
+        <button id="logToggle" class="log-toggle" type="button" aria-expanded="false">
+          <span>Activity log</span>
+          <span id="logCount" class="log-count">0</span>
+          <span class="chev" aria-hidden="true">▾</span>
+        </button>
+        <div id="logBody" class="log-body" hidden>
+          <div class="log-actions">
+            <button id="clearLogBtn" class="link-btn" type="button">Clear log</button>
+          </div>
+          <ul id="logList" class="log-list"></ul>
+        </div>
+      </section>
+
+      <section class="card settings">
+        <details>
+          <summary>Settings</summary>
+          <div class="settings-body">
+            <div class="settings-group">
+              <div class="settings-title">Pacing</div>
+              <label class="range-row">
+                <span>Min delay</span>
+                <input id="pacingMin" type="range" min="700" max="2000" step="50" />
+                <span id="pacingMinVal" class="mono"></span>
+              </label>
+              <label class="range-row">
+                <span>Max delay</span>
+                <input id="pacingMax" type="range" min="700" max="2000" step="50" />
+                <span id="pacingMaxVal" class="mono"></span>
+              </label>
+              <p class="hint">Every scroll and click is followed by a randomized pause inside this range.</p>
+            </div>
+            <div class="settings-group">
+              <div class="settings-title">Caps</div>
+              <div class="caps-grid">
+                <label>Max posts <input id="setMaxPosts" type="number" min="0" /></label>
+                <label>Max followers <input id="setMaxFollowers" type="number" min="0" /></label>
+                <label>Max following <input id="setMaxFollowing" type="number" min="0" /></label>
+                <label>Max likers / post <input id="setMaxLikers" type="number" min="0" /></label>
+                <label>Max comments / post <input id="setMaxComments" type="number" min="0" /></label>
+              </div>
+            </div>
+            <div class="settings-group">
+              <div class="settings-title">Daily limits</div>
+              <div class="caps-grid">
+                <label>Profiles / day <input id="setMaxProfiles" type="number" min="1" /></label>
+                <label>Minutes / day <input id="setMaxMinutes" type="number" min="1" /></label>
+                <label>Break reminder <input id="setWarnMinutes" type="number" min="5" /></label>
+              </div>
+            </div>
+            <div class="settings-save">
+              <button id="saveSettingsBtn" class="btn btn-primary" type="button">Save settings</button>
+              <span id="settingsNote" class="hint"></span>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <footer class="app-footer">
+        <span>Use a secondary account. No cloud, no telemetry. v<span id="versionText"></span></span>
+      </footer>
+    </main>
+
+    <script type="module" src="panel.js"></script>
+  </body>
+</html>
